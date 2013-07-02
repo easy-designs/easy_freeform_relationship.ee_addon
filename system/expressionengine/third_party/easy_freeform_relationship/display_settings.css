@@ -1,0 +1,12 @@
+.easy_freeform_relationship_fields {
+	list-style: none;
+	overflow: hidden;
+	margin: 0;
+	padding: 0;
+}
+.easy_freeform_relationship_fields li {
+	display: block;
+	float: left;
+	margin: 0 2em 0 0;
+	padding: 0;
+}
