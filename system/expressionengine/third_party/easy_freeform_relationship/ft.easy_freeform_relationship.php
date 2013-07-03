@@ -51,6 +51,7 @@ class Easy_freeform_relationship_ft extends EE_Fieldtype {
 		$query = $this->EE->db->query("
 			SELECT	`form_name`,
 					`form_label`,
+					`field_ids`,
 					`field_order`
 			FROM	`exp_freeform_forms`
 			WHERE	`site_id` = {$this->EE->config->item('site_id')}
@@ -61,7 +62,15 @@ class Easy_freeform_relationship_ft extends EE_Fieldtype {
 			foreach( $query->result_array() as $row )
 			{
 				$forms[$row['form_name']] = $row['form_label'];
-				$form_fields[$row['form_name']] = $row['field_order'];
+				# field order should dominate, but sometimes it is not full filled in
+				if ( strlen( $row['field_ids'] ) == strlen( $row['field_order'] ) )
+				{
+					$form_fields[$row['form_name']] = $row['field_order'];
+				}
+				else
+				{
+					$form_fields[$row['form_name']] = $row['field_ids'];
+				}
 			}
 		}
 		
