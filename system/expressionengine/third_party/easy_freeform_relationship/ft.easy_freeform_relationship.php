@@ -248,39 +248,44 @@ class Easy_freeform_relationship_ft extends EE_Fieldtype {
 	 */
 	function replace_tag( $data, $params=array(), $tagdata=FALSE )
 	{
-		
+
 		if ( $tagdata )
 		{
-			list( $form_id, $entry_id ) = explode( ':', $data );
-
-			# get the submission
-			$submission = array_shift(
-				$this->EE->db->query("
-					SELECT	*
-					FROM	`exp_freeform_form_entries_{$form_id}`
-					WHERE	`entry_id` = '{$entry_id}'
-					LIMIT 1
-				")->result_array()
-			);
-
-			# transcribe numeric fields
-			$fields = array();
-			$rows = $this->EE->db->query("
-				SELECT	`field_id`,
-						`field_name`
-				FROM	`exp_freeform_fields`
-			")->result_array();
-			foreach ( $rows as $row )
+			if ( preg_match( '/\\d+:\\d+/', $data ) )
 			{
-				if ( isset( $submission["form_field_{$row['field_id']}"] ) )
+				list( $form_id, $entry_id ) = explode( ':', $data );
+			
+				# get the submission
+				$submission = array_shift(
+					$this->EE->db->query("
+						SELECT	*
+						FROM	`exp_freeform_form_entries_{$form_id}`
+						WHERE	`entry_id` = '{$entry_id}'
+						LIMIT 1
+					")->result_array()
+				);
+
+				# transcribe numeric fields
+				$fields = array();
+				$rows = $this->EE->db->query(
+					"
+					SELECT	`field_id`,
+							`field_name`
+					FROM	`exp_freeform_fields`
+					"
+				)->result_array();
+				foreach ( $rows as $row )
 				{
-					$submission[$row['field_name']] = $submission["form_field_{$row['field_id']}"];
-					unset( $submission["form_field_{$row['field_id']}"] );
+					if ( isset( $submission["form_field_{$row['field_id']}"] ) )
+					{
+						$fields[0][$row['field_name']] = $submission["form_field_{$row['field_id']}"];
+					}
 				}
+
+				# swap!
+				$data = $this->EE->TMPL->parse_variables( $tagdata, $fields );
 			}
 			
-			# swap!
-			$data = $this->EE->functions->var_swap( $tagdata, $submission );
 		}
 		
 		return $data;
